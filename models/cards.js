@@ -10,11 +10,9 @@ const cardSchema = new mongoose.Schema({
   link: {
     type: String,
     required: true,
+    match: /^https?:\/\/(((w{3}\.)?(\w+\.)+[a-zA-Z]{2,6})|((\d{1,3}\.){3}\d{1,3}))(:\d{2,5})?(\/[\w+-.?=]+)*#?$/,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
+
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
@@ -24,6 +22,10 @@ const cardSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     default: [],
   }],
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model('card', cardSchema);
