@@ -1,0 +1,30 @@
+{
+  "name": "praktikum-13",
+  "version": "1.0.0",
+  "description": "Учебный проект Яндекс.Практикум - одностраничный сайт, который подгружает/изменяет профиль пользователя с сервера и загружает с сервера и показывает карточки с фото и названием. К нему добавляем API для загрузки карточек и списка пользователей. В разработке.",
+  "main": "app.js",
+  "scripts": {
+    "dev": "nodemon app.js",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/laka-vadim/praktikum-13.git"
+  },
+  "author": "Vadim Popov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/laka-vadim/praktikum-13/issues"
+  },
+  "homepage": "https://github.com/laka-vadim/praktikum-13#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^5.7.9"
+  },
+  "devDependencies": {
+    "eslint": "^6.6.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "nodemon": "^1.19.4"
+  }
+}
