@@ -21,6 +21,6 @@ module.exports.getUsers = (req, res) => {
 module.exports.postUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.status(201).send({ data: user }))
     .catch((err) => res.status(500).send({ message: `Произошла ошибка на сервере: ${err}` }));
 };
