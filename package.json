@@ -18,9 +18,11 @@
   },
   "homepage": "https://github.com/laka-vadim/praktikum-13#readme",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
-    "mongoose": "^5.7.9"
+    "mongoose": "^5.7.9",
+    "validator": "^12.0.0"
   },
   "devDependencies": {
     "eslint": "^6.6.0",
