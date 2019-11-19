@@ -7,6 +7,8 @@ const cards = require('./routes/cards');
 const users = require('./routes/users');
 const { postUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const pageNotFound = require('./middlewares/pageNotFound');
+const errors = require('./middlewares/errors');
 
 
 const { PORT = 3000 } = process.env;
@@ -30,9 +32,10 @@ app.use(auth);
 app.use('/cards', cards);
 app.use('/users', users);
 
-// Err 404 Not Found
-app.use((req, res) => {
-  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
-});
+// Err 404 Page Not Found
+app.use(pageNotFound);
+
+// Err From Controllers
+app.use(errors);
 
 app.listen(PORT);

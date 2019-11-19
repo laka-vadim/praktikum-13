@@ -5,6 +5,13 @@ class NotFoundError extends Error {
   }
 }
 
+class ForbiddenError extends Error {
+  constructor(message) {
+      super(message);
+      this.statusCode = 403;
+  }
+}
+
 class UnauthorizedError extends Error {
   constructor(message) {
       super(message);
@@ -19,4 +26,4 @@ class BadRequestError extends Error {
   }
 }
 
-module.exports = { NotFoundError, UnauthorizedError, BadRequestError };
+module.exports = { NotFoundError, ForbiddenError, UnauthorizedError, BadRequestError };
