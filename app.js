@@ -1,14 +1,17 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const { celebrate, Joi } = require('celebrate');
 
 const cards = require('./routes/cards');
 const users = require('./routes/users');
 const { postUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const pageNotFound = require('./middlewares/pageNotFound');
-const errors = require('./middlewares/errors');
+const MyErrors = require('./middlewares/errors');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 
 const { PORT = 3000 } = process.env;
@@ -24,9 +27,27 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useFindAndModify: false,
 });
 
-app.post('/signin', login);
-app.post('/signup', postUser);
+app.use(requestLogger);
 
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required(),
+    password: Joi.string().required(),
+  })
+}), login);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required(),
+    password: Joi.string().required(),
+    name: Joi.string().required().min(2).max(30),
+    about: Joi.string().required().min(2).max(30),
+    avatar: Joi.string()
+    .pattern(/^https?:\/\/(((w{3}\.)?(\w+\.)+[a-zA-Z]{2,6})|((\d{1,3}\.){3}\d{1,3}))(:\d{2,5})?(\/[\w+-.?=]+)*#?$/)
+    .required(),
+  })
+}), postUser);
+
+// Err 403 Authorization Err
 app.use(auth);
 
 app.use('/cards', cards);
@@ -35,7 +56,11 @@ app.use('/users', users);
 // Err 404 Page Not Found
 app.use(pageNotFound);
 
+app.use(errorLogger);
+
+app.use(errors());
+
 // Err From Controllers
-app.use(errors);
+app.use(MyErrors);
 
 app.listen(PORT);

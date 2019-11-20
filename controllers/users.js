@@ -4,8 +4,9 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/users');
 const { NotFoundError, UnauthorizedError, BadRequestError } = require('../errors/errors');
+const { NODE_ENV, JWT_SECRET } = process.env;
 
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
@@ -16,13 +17,13 @@ module.exports.getUserById = (req, res) => {
     .catch(next);
 };
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((user) => res.send({ data: user }))
     .catch(next);
 };
 
-module.exports.postUser = (req, res) => {
+module.exports.postUser = (req, res, next) => {
   const {
     email,
     password,
@@ -48,7 +49,7 @@ module.exports.postUser = (req, res) => {
     .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({ email }).select('+password')
     .then((user) => {
@@ -62,7 +63,7 @@ module.exports.login = (req, res) => {
           }
           const token = jwt.sign(
             { _id: user._id },
-            'some-secret-key',
+            NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
             { expiresIn: '7d' },
           );
           return res
