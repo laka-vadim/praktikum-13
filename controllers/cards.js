@@ -1,5 +1,6 @@
 const Cards = require('../models/cards');
-const { NotFoundError, ForbiddenError } = require('../errors/errors');
+const NotFoundError = require('../errors/notFoundError');
+const ForbiddenError = require('../errors/forbiddenError');
 
 module.exports.getCards = (req, res, next) => {
   Cards.find({})
