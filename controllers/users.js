@@ -1,27 +1,32 @@
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/users');
 
-module.exports.getUserById = (req, res) => {
+const User = require('../models/users');
+const NotFoundError = require('../errors/notFoundError');
+const UnauthorizedError = require('../errors/unauthorizedError');
+const BadRequestError = require('../errors/badRequestError');
+
+const { NODE_ENV, JWT_SECRET } = process.env;
+
+module.exports.getUserById = (req, res, next) => {
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: 'Err 404: User not found' });
-        return;
+        throw new NotFoundError('Err 404: User not found');
       }
       res.send({ data: user });
     })
-    .catch((err) => res.status(400).send({ message: `Err 400: Incorrect data. Server answer: ${err}` }));
+    .catch(next);
 };
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((user) => res.send({ data: user }))
-    .catch((err) => res.status(400).send({ message: `Err 400: Incorrect data. Server answer: ${err}` }));
+    .catch(next);
 };
 
-module.exports.postUser = (req, res) => {
+module.exports.postUser = (req, res, next) => {
   const {
     email,
     password,
@@ -30,8 +35,7 @@ module.exports.postUser = (req, res) => {
     avatar,
   } = req.body;
   if (!validator.isEmail(email)) {
-    res.status(400).send({ message: 'Err 400: Invalid email' });
-    return;
+    throw new BadRequestError('Err 400: Invalid email');
   }
   bcrypt.hash(password, 10)
     .then((hash) => {
@@ -43,26 +47,26 @@ module.exports.postUser = (req, res) => {
         avatar,
       })
         .then((user) => res.status(201).send({ data: user }))
-        .catch((err) => res.status(400).send({ message: `Err 400: Incorrect data. Server answer: ${err}` }));
+        .catch(next);
     })
-    .catch((err) => res.status(400).send({ message: `Err 400: Incorrect data. Server answer: ${err}` }));
+    .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Err 401: Incorrect login or/and email.'));
+        throw new UnauthorizedError('Err 401: Incorrect login or/and email.');
       }
       return bcrypt.compare(password, user.password)
         .then((match) => {
           if (!match) {
-            return Promise.reject(new Error('Err 401: Incorrect login or/and email.'));
+            throw new UnauthorizedError('Err 401: Incorrect login or/and email.');
           }
           const token = jwt.sign(
             { _id: user._id },
-            'some-secret-key',
+            NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
             { expiresIn: '7d' },
           );
           return res
@@ -72,5 +76,5 @@ module.exports.login = (req, res) => {
             }).end();
         });
     })
-    .catch((err) => res.status(401).send({ message: `${err.message}` }));
+    .catch(next);
 };

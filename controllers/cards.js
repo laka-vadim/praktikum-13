@@ -1,32 +1,32 @@
 const Cards = require('../models/cards');
+const NotFoundError = require('../errors/notFoundError');
+const ForbiddenError = require('../errors/forbiddenError');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Cards.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch((err) => res.status(400).send({ message: `Err 400: Incorrect data. Server answer: ${err}` }));
+    .catch(next);
 };
 
-module.exports.postCard = (req, res) => {
+module.exports.postCard = (req, res, next) => {
   const { name, link } = req.body;
   Cards.create({ name, link, owner: req.user._id })
     .then((card) => res.status(201).send({ data: card }))
-    .catch((err) => res.status(400).send({ message: `Err 400: Incorrect data. Server answer: ${err}` }));
+    .catch(next);
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   Cards.findById(req.params.id).populate('owner')
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Err 404: Card not found' });
-        return;
+        throw new NotFoundError('Err 404: Card not found');
       }
       if (card.owner._id.toString() !== req.user._id) {
-        res.status(403).send({ message: 'Err 403: You havent permission for this' });
-        return;
+        throw new ForbiddenError('Err 403: You havent permission for this');
       }
       Cards.findByIdAndRemove(req.params.id)
         .then((obj) => res.send({ data: obj }))
-        .catch((err) => res.status(500).send({ message: `Err 500: Server error. Server answer: ${err}` }));
+        .catch(next);
     })
-    .catch((err) => res.status(400).send({ message: `Err 400: Incorrect data. Server answer: ${err}` }));
+    .catch(next);
 };
